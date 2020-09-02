@@ -466,6 +466,7 @@ def _create_dummy_repository(repository_ctx):
         {
             "%{rocm_is_configured}": "False",
             "%{rocm_extra_copts}": "[]",
+            "%{rocm_gpu_architectures}": "[]",
         },
     )
     _tpl(
