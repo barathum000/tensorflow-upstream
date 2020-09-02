@@ -1083,7 +1083,7 @@ namespace functor {
       const std::array<int, 3>& padding_left,                         \
       const std::array<int, 3>& padding_right,                        \
       typename TTypes<T, 5, int>::Tensor out, TensorFormat format,    \
-      T padding_value);
+      T padding_value, int dummy);
 
 DECLARE_GPU_SPEC(Eigen::half);
 DECLARE_GPU_SPEC(float);

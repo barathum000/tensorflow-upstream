@@ -309,6 +309,28 @@ struct TransformDepth {
   }
 };
 
+// Note on the extra "int dummy = 0" argument in the PadInput functor
+// In the ROCm TF build,
+// ++ the call(s) to the functor are in the files (conv_*.cc) that are compiled
+//    by the "CPU" compiler, while the
+// ++ the GPUDevice specific template instantiations are in the files that are
+//     compiled by the "GPU" compiler.
+//
+// For T == Eigen::half, the value of the "padding_value" argument seems to be
+// getting corrupted, leading to regressions in the convolution unit tests.
+//
+// The value seems to be correct when printed at the call site(s), and corrupted
+// when printed in the GPU specialization within `conv_2d_gpu.h`
+//
+// I do not understand the exact reason for the this, but based on similar past
+// issues, it is likely due to ABI incompatibility between the "old" CPU
+// compiler (gcc 5.4 for Ubuntu 16.04, gcc 7.5 for Ubuntu 18.04) and the "new"
+// ROCm GPU compiler (hipclang which is based on latest clang)
+//
+// Adding an extra int argument to the functor seems to result in the value for
+// the "padding_value" argument no longer getting corrupted.
+//
+// This workaround can be removed once the "CPU" compiler is gcc8 or higher.
 template <typename Device, typename T, typename IndexType, int NDIMS>
 struct PadInput {
   void operator()(const Device& d,
@@ -316,7 +338,7 @@ struct PadInput {
                   const std::array<int, NDIMS - 2>& padding_left,
                   const std::array<int, NDIMS - 2>& padding_right,
                   typename TTypes<T, NDIMS, IndexType>::Tensor out,
-                  TensorFormat format, T padding_value = T{}) {
+                  TensorFormat format, T padding_value = T{}, int dummy = 0) {
     Eigen::array<Eigen::IndexPair<IndexType>, NDIMS> padding;
     padding[GetTensorDimIndex<NDIMS - 2>(format, 'N')] = {0, 0};
     for (int i = 0; i < NDIMS - 2; ++i) {

@@ -1346,7 +1346,7 @@ namespace functor {
       const std::array<int, 2>& padding_left,                           \
       const std::array<int, 2>& padding_right,                          \
       typename TTypes<T, 4, int>::Tensor out, TensorFormat data_format, \
-      T padding_value);                                                 \
+      T padding_value, int dummy);                                      \
   extern template struct PadInput<GPUDevice, T, int, 4>;
 
 DECLARE_GPU_SPEC(float);
