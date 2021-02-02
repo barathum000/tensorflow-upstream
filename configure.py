@@ -1201,6 +1201,10 @@ def system_specific_test_config(environ_cp):
     else:
       test_and_build_filters.append('-gpu')
 
+  # Disable tests with "no_rocm" tag if using ROCm backend
+  if environ_cp.get('TF_NEED_ROCM', None) == '1':
+    test_and_build_filters.append('-no_rocm')
+
   # Disable tests with "v1only" tag in "v2" Bazel config, but not in "v1" config
   write_to_bazelrc('test:v1 --test_tag_filters=%s' %
                    ','.join(test_and_build_filters + test_only_filters))
